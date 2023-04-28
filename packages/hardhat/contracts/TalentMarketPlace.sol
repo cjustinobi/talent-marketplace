@@ -106,12 +106,7 @@ contract TalentMarketPlace {
     vendorCount ++;
   }
 
-  function createTransaction (
-    uint256 vendorIndex,
-    address payable vendor,
-    uint256 amount
-
-  ) public payable {
+  function createTransaction (uint256 vendorIndex, address payable vendor) public payable {
 
     require(vendorIndex <= vendorCount, "Vendor index does not exist");
 
@@ -119,7 +114,7 @@ contract TalentMarketPlace {
 
     Vendor storage _vendor = vendors[vendorIndex];
 
-    require(_vendor.price == amount, "Wrong amount entered");
+    require(_vendor.price == msg.value, "Wrong amount entered");
 
     require(_vendor.vendorAddress == vendor, "Wrong Vendor address entered");
 
@@ -171,7 +166,13 @@ contract TalentMarketPlace {
     return address(this).balance;
   }
 
+   function getTime() public view returns (uint256) {
+
+      return block.timestamp;
+    }
+
   function getVendors(uint256 _index) public view returns (
+    uint256 id,
     address vendorAddress,
     string memory businessName,
     string memory filePath,
@@ -185,6 +186,7 @@ contract TalentMarketPlace {
     Vendor storage vendor = vendors[_index];
 
     return (
+    _index,
     vendor.vendorAddress,
     vendor.businessName,
     vendor.filePath,

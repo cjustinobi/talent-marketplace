@@ -1,10 +1,17 @@
-import { useState } from 'react'
+import { useRouter } from 'next/router'
+import Link from 'next/link';
 import { Disclosure } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import Image from 'next/image'
+import CreateAccountModal from "@/components/CreateAccountModal";
 
 export default function Header() {
+
+  const router = useRouter()
+
+  console.log(router.pathname)
+
     return (
       <Disclosure as="nav" className="bg-prosperity border-b border-black">
         {({ open }) => (
@@ -27,18 +34,26 @@ export default function Header() {
                     <Image className="block h-8 w-auto sm:block lg:block" src="/logo.svg" width="24" height="24" alt="Celo Logo" />
                   </div>
                   <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                    <a
-                      href="#"
-                      className="inline-flex items-center border-b-2 border-black px-1 pt-1 text-sm font-medium text-gray-900"
+                    <Link
+                      href="/"
+                      className={`inline-flex items-center ${router.pathname === '/' ? 'border-b-2 border-black' : ''} px-1 pt-1 text-sm font-medium text-gray-900`}
                     >
                       Home
-                    </a>
-                    
+                    </Link>
+                    <Link
+                      href="/my-transactions"
+                      className={`inline-flex items-center ${router.pathname === '/my-transactions' ? 'border-b-2 border-black' : ''} px-1 pt-1 text-sm font-medium text-gray-900`}
+                    >
+                      my-trans
+                    </Link>
+
                   </div>
                 </div>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+
+                <CreateAccountModal />
+
                 <ConnectButton showBalance={{smallScreen: true, largeScreen: false}} />
-                <button onClick={() => setCreateAccountForm(true)}>Create Account</button>
                 </div>
               </div>
             </div>

@@ -20,7 +20,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   //   log: true,
   // });
 
-  await deploy("SkillMarketPlace", {
+  await deploy("TalentMarketPlace", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
     //args: [ethers.utils.parseEther("0.05")],
