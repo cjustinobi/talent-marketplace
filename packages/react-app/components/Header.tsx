@@ -44,7 +44,7 @@ export default function Header() {
                       href="/my-transactions"
                       className={`inline-flex items-center ${router.pathname === '/my-transactions' ? 'border-b-2 border-black' : ''} px-1 pt-1 text-sm font-medium text-gray-900`}
                     >
-                      my-trans
+                      My Transactions
                     </Link>
 
                   </div>
