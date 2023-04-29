@@ -140,13 +140,15 @@ contract TalentMarketPlace {
 
   function confirmService(uint256 _index, address _vendorAddress) public {
 
-     Transaction storage transaction = customerTransactions[msg.sender][_index];
-     VendorTransaction storage vendorTransaction = vendorTransactions[_vendorAddress][_index];
+    Transaction storage transaction = customerTransactions[msg.sender][_index];
+    VendorTransaction storage vendorTransaction = vendorTransactions[_vendorAddress][_index];
 
     require(transaction.customer == msg.sender, "Only the customer can confirm the service");
     require((transaction.status == Status.Reviewing) || (transaction.status == Status.InProgress), "Transaction has been completed already");
 
      // TODO Transfer to vendor
+    (bool sent,) = _vendorAddress.call{value: transaction.amount}("");
+    require(sent, "Failed to send Ether");
 
     transaction.status = Status.Completed;
     transaction.dateCompleted = block.timestamp;

@@ -4,7 +4,6 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        // hostname: 'assets-global.website-files.com',
         hostname: '**',
         port: '',
         pathname: '**'

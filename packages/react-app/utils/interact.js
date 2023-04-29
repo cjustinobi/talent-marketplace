@@ -1,9 +1,8 @@
 import { providers, Contract } from 'ethers'
-import { WrapperBuilder } from 'redstone-evm-connector'
 import Lottery from '../../hardhat/artifacts/contracts/TalentMarketPlace.sol/TalentMarketPlace.json'
 import { priceToWei } from './helpers'
 
-export const contractAddress = '0x7F4397aF898304a0242CF50CaD8D184C6D7B0bA9'
+export const contractAddress = '0x5dE11742D370c1a3e5E8531dc4bFCEa9df0eFA45'
 
 export async function getContract() {
 
@@ -83,18 +82,12 @@ export const createTransaction = async (index, address, value) => {
   }
 }
 
-export const endLottery = async index => {
+export const approve = async (index, vendorAddress) => {
 
   try {
     const contract = await getContract()
 
-    const wrappedContract = WrapperBuilder
-      .wrapLite(contract)
-      .usingPriceFeed('redstone', { asset: 'ENTROPY' })
-
-    await wrappedContract.authorizeProvider();
-
-    let res = await wrappedContract.pickWinner(index)
+    let res = await contract.confirmService(index, vendorAddress)
     return await res.wait()
 
 

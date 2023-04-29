@@ -24,12 +24,16 @@ const MyTransactions = () => {
       <div className="grid grid-cols-3 gap-4 mt-10">
         {transactions && transactions.map(tx => (
           <TransactionCard
+            key={tx.transactionIndex}
+            id={tx.transactionIndex}
+            vendor={tx.vendor}
             image={tx.filePath}
             amount={tx.amount.toString()}
             businessName={tx.businessName}
             created={tx.dateCreated.toString()}
             completed={tx.dateCompleted.toString()}
             status={tx.status}
+            getTransactionsHandler={getTransactionsHandler}
           />
         ))}
       </div>

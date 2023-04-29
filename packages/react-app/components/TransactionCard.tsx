@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import { ethers } from 'ethers'
-import { createTransaction, timestampToDate, STATUS } from '../utils'
+import { approve, timestampToDate, STATUS } from '../utils'
 import { useAccount } from 'wagmi'
 
 interface TransactionCardProps {
@@ -10,6 +10,7 @@ interface TransactionCardProps {
   vendor: string
   image: string
   status: number
+  getTransactionsHandler: () => void;
 }
 
 
@@ -20,9 +21,8 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
     amount,
     vendor,
     image,
-    status
-
-     // endLotteryHandler
+    status,
+    getTransactionsHandler
    }) => {
 
   const statusStyle = status => {
@@ -40,9 +40,9 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
 
   const { address } = useAccount()
 
-  const hire = (id, address, price) => {
-    createTransaction(id.toString(), address, price.toString())
-    // console.log(price)
+  const approveHandler = async (id, address) => {
+    await approve(id.toString(), address)
+    getTransactionsHandler()
   }
 
   return (
@@ -82,7 +82,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
           {(STATUS(status) === 'Cancelled') && <button disabled className="mt-3 bg-slate-300 w-28 rounded">
             Cancelled
           </button>}
-          {(STATUS(status) === 'InProgress') && <button onClick={() => hire(id)} className="mt-3 bg-slate-300 w-28 rounded">
+          {(STATUS(status) === 'InProgress') && <button onClick={() => approveHandler(id, vendor)} className="mt-3 bg-slate-300 w-28 rounded">
             Approve
           </button>}
         {/*  {ended && <div><button disabled className="mt-3 bg-slate-200 w-28 rounded">*/}
