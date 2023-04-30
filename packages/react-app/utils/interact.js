@@ -69,6 +69,24 @@ export const getTransactions = async address => {
   }
 }
 
+export const getVendorTransactions = async address => {
+  try {
+    const contract = await getContract()
+    const txCount = await contract.getVendorTransactionCount()
+
+    let txs = []
+
+    for (let i = 0; i < txCount; i++) {
+      const tx = await contract.getVendorTransactions(i, address)
+      txs.push(tx)
+    }
+    return txs
+
+  } catch (e) {
+    console.log(e)
+  }
+}
+
 export const createTransaction = async (index, address, value) => {
 
   try {

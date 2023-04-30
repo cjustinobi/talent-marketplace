@@ -5,29 +5,11 @@ pragma solidity ^0.8.9;
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
 
-interface IERC20 {
-
-    function totalSupply() external view returns (uint256);
-    function balanceOf(address account) external view returns (uint256);
-    function allowance(address owner, address spender) external view returns (uint256);
-
-    function transfer(address recipient, uint256 amount) external returns (bool);
-    function approve(address spender, uint256 amount) external returns (bool);
-    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
-
-
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-}
-
-
 contract TalentMarketPlace {
 
   bool internal locked;
 
   uint256 public vendorCount;
-
-  address internal cUsdTokenAddress = 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
 
   enum Status {
     Cancelled,
@@ -146,7 +128,6 @@ contract TalentMarketPlace {
     require(transaction.customer == msg.sender, "Only the customer can confirm the service");
     require((transaction.status == Status.Reviewing) || (transaction.status == Status.InProgress), "Transaction has been completed already");
 
-     // TODO Transfer to vendor
     (bool sent,) = _vendorAddress.call{value: transaction.amount}("");
     require(sent, "Failed to send Ether");
 
@@ -158,20 +139,33 @@ contract TalentMarketPlace {
     Vendor storage vendor = vendors[transaction.vendorIndex];
     vendor.totalAmount += transaction.amount;
     vendor.transactionCount ++;
-
-
   }
+
+  function cancelService(uint256 _index, address _vendorAddress) public {
+
+      Transaction storage transaction = customerTransactions[msg.sender][_index];
+      VendorTransaction storage vendorTransaction = vendorTransactions[_vendorAddress][_index];
+
+      require((transaction.status != Status.Reviewing) && timestamp <= block.timestamp - (3 days), "You can not cancel ");
+      require(transaction.customer == msg.sender, "Only the customer can cancel the service");
+
+      require(!locked, "Reentrant call");
+      locked = true;
+      (bool sent,) = msg.sender.call{value: transaction.amount}("");
+      require(sent, "Failed to send Ether");
+      locked = false;
+
+      transaction.status = Status.Cancelled;
+      transaction.dateCompleted = block.timestamp;
+      vendorTransaction.status = Status.Cancelled;
+      vendorTransaction.dateCompleted = block.timestamp;
+    }
 
 
   function getBal() public view returns (uint256) {
 
     return address(this).balance;
   }
-
-   function getTime() public view returns (uint256) {
-
-      return block.timestamp;
-    }
 
   function getVendors(uint256 _index) public view returns (
     uint256 id,
@@ -264,18 +258,6 @@ contract TalentMarketPlace {
 
   function getVendorCount() public view returns (uint256) {
     return vendorCount;
-  }
-
-  function transferCUSD(address recipient, uint256 amount) public {
-    require(!locked, "Reentrant call");
-    locked = true;
-
-    IERC20 cUsd = IERC20(cUsdTokenAddress);
-    require(cUsd.balanceOf(msg.sender) >= amount, "Insufficient balance");
-    require(cUsd.allowance(msg.sender, address(this)) >= amount, "Not enough allowance");
-    cUsd.transferFrom(msg.sender, recipient, amount);
-
-    locked = false;
   }
 
 }

@@ -46,7 +46,12 @@ export default function Header() {
                     >
                       My Transactions
                     </Link>
-
+                    <Link
+                      href="/my-jobs"
+                      className={`inline-flex items-center ${router.pathname === '/my-jobs' ? 'border-b-2 border-black' : ''} px-1 pt-1 text-sm font-medium text-gray-900`}
+                    >
+                      My Jobs
+                    </Link>
                   </div>
                 </div>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">

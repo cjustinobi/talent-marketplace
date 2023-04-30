@@ -1,15 +1,12 @@
-import Image from 'next/image'
 import { ethers } from 'ethers'
-import { approve, timestampToDate, STATUS } from '../utils'
+import { approve, timestampToDate, STATUS, truncate } from '../utils'
 import { useAccount } from 'wagmi'
 
 interface TransactionCardProps {
   id: number
-  businessName: string
-  amount: number
-  vendor: string
-  image: string
+  customer: string
   status: number
+  dateCreated: number
   getTransactionsHandler: () => void;
 }
 
@@ -17,11 +14,9 @@ interface TransactionCardProps {
 
 const TransactionCard: React.FC<TransactionCardProps> = ({
     id,
-    businessName,
-    amount,
-    vendor,
-    image,
+    customer,
     status,
+    created,
     getTransactionsHandler
    }) => {
 
@@ -47,14 +42,9 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
 
   return (
       <div className="bg-white rounded-lg shadow-lg p-4">
-        <Image
-          src={image}
-          width="200"
-          height="200"
-          alt="Product image"
-        />
-        <h2 className="my-2 font-bold">{businessName}</h2>
-        <div className="flex justify-between">
+        <h2 className="font-light">{truncate(customer)}</h2>
+        <small>Created: {timestampToDate(created)}</small>
+        <div className="flex justify-between mt-3">
           <style jsx>{`
           .status {
             color: #fefefe;
@@ -65,7 +55,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
         .Reviewing { background: grey; }
         .Completed { background: green; }
       `}</style>
-          <span className="font-light">{ethers.utils.formatEther(amount)} CELO</span>
+          {/*<span className="font-light">{ethers.utils.formatEther(amount)} CELO</span>*/}
           <span className={`status ${STATUS(status)}`}>{STATUS(status)}</span>
         </div>
         {/*<div className="flex justify-between">*/}
@@ -90,15 +80,8 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
               Approve
             </button>
           </div>}
-        {/*  {ended && <div><button disabled className="mt-3 bg-slate-200 w-28 rounded">*/}
-        {/*    Lottery Ended*/}
-        {/*  </button>*/}
-        {/*  <br/>*/}
-        {/*  <small>Winner: {truncate(winner)}</small>*/}
-        {/*  </div>}*/}
-        {/*</div>*/}
       </div>
-  );
-};
+  )
+}
 
 export default TransactionCard

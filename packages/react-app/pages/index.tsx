@@ -31,6 +31,7 @@ const Home = () => {
               businessName={vendor.businessName}
               price={vendor.price}
               vendor={vendor.vendorAddress}
+              getVendorsHandler={getVendorsHandler}
             />
           ))}
       </div>
