@@ -3,14 +3,11 @@ import Link from 'next/link';
 import { Disclosure } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
-import Image from 'next/image'
-import CreateAccountModal from "@/components/CreateAccountModal";
+import CreateAccountModal from '@/components/CreateAccountModal'
 
 export default function Header() {
 
   const router = useRouter()
-
-  console.log(router.pathname)
 
     return (
       <Disclosure as="nav" className="bg-prosperity border-b border-black">
@@ -31,15 +28,9 @@ export default function Header() {
                 </div>
                 <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                   <div className="flex flex-shrink-0 items-center">
-                    <Image className="block h-8 w-auto sm:block lg:block" src="/logo.svg" width="24" height="24" alt="Celo Logo" />
+                    <Link href="/" className="font-semibold">Talent MKT</Link>
                   </div>
                   <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                    <Link
-                      href="/"
-                      className={`inline-flex items-center ${router.pathname === '/' ? 'border-b-2 border-black' : ''} px-1 pt-1 text-sm font-medium text-gray-900`}
-                    >
-                      Home
-                    </Link>
                     <Link
                       href="/my-transactions"
                       className={`inline-flex items-center ${router.pathname === '/my-transactions' ? 'border-b-2 border-black' : ''} px-1 pt-1 text-sm font-medium text-gray-900`}

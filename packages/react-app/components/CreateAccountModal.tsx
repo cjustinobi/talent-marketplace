@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { useRouter } from 'next/router'
 import { createAccount } from '../utils'
 
 const CreateAccountModal = () => {
 
+  const router = useRouter()
 
   const [showModal, setShowModal] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -15,9 +17,9 @@ const CreateAccountModal = () => {
   const createAccountHandler = async () => {
     setLoading(true)
     const res = await createAccount(businessName, service, image, description, price)
-    console.log(res)
     setShowModal(false)
     setLoading(false)
+    await router.push('/')
   }
 
   return (

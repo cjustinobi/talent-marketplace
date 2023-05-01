@@ -2,7 +2,7 @@ import { providers, Contract } from 'ethers'
 import Lottery from '../../hardhat/artifacts/contracts/TalentMarketPlace.sol/TalentMarketPlace.json'
 import { priceToWei } from './helpers'
 
-export const contractAddress = '0x5300D985a805DA1F182077d5ff188383a4bDa131'
+export const contractAddress = '0x389D265Bb40f1275CFd6Edb92EF1D26884A937ff'
 
 export async function getContract() {
 
@@ -170,5 +170,5 @@ export const test = async () => {
   }
 }
 
-// https://tailwindcss.com/_next/static/media/tailwindcss-mark.3c5441fc7a190fb1800d4a5c7f07ba4b1345a9c8.svg
+  // https://tailwindcss.com/_next/static/media/tailwindcss-mark.3c5441fc7a190fb1800d4a5c7f07ba4b1345a9c8.svg
 

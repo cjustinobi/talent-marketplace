@@ -37,25 +37,10 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
     getTransactionsHandler
    }) => {
 
-  const statusStyle = status => {
-    switch (status) {
-      case 'InProgress':
-        return {'backgroundColor': 'red'}
-      case 'Reviewing':
-        return {'background': 'grey'}
-      case 'Completed':
-        return {'background': 'green'}
-      default:
-        return ''
-    }
-  }
-
-
   const approveHandler = async () => {
     await approve(id.toString(), vendor)
     getTransactionsHandler()
   }
-
 
   const cancelHandler = async () => {
     await cancelService(id.toString(), vendor)
@@ -82,6 +67,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
             border-radius: 8px;
             padding: 0 3px;
           }
+        .Cancelled { background: #ffcbcb; }
         .InProgress { background: LightSteelBlue; }
         .Reviewing { background: grey; }
         .Completed { background: green; }
@@ -89,10 +75,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
           <span className="font-light">{ethers.utils.formatEther(amount)} CELO</span>
           <span className={`status ${STATUS(status)}`}>{STATUS(status)}</span>
         </div>
-          {(STATUS(status) === 'Cancelled') && <button disabled className="mt-3 bg-slate-300 w-28 rounded">
-            Cancelled
-          </button>}
-          {(STATUS(status) === 'InProgress') || (STATUS(status) === 'Reviewing') && <div className="flex justify-between">
+          {((STATUS(status) === 'InProgress') || (STATUS(status) === 'Reviewing')) && <div className="flex justify-between">
             <button onClick={cancelHandler} className="mt-3 mr-1 bg-slate-200 w-28 rounded">
               Cancel
             </button>

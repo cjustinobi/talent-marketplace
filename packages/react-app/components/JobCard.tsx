@@ -24,19 +24,6 @@ const JobCard: React.FC<TransactionCardProps> = ({
     getTransactionsHandler
    }) => {
 
-  const statusStyle = status => {
-    switch (status) {
-      case 'InProgress':
-        return {'backgroundColor': 'red'}
-      case 'Reviewing':
-        return {'background': 'grey'}
-      case 'Completed':
-        return {'background': 'green'}
-      default:
-        return ''
-    }
-  }
-
   const reviewHandler = async () => {
     await sendForReview(id.toString(), customer)
     getTransactionsHandler()
@@ -59,6 +46,7 @@ const JobCard: React.FC<TransactionCardProps> = ({
             border-radius: 8px;
             padding: 0 3px;
           }
+        .Cancelled { background: #ffcbcb; }
         .InProgress { background: LightSteelBlue; }
         .Reviewing { background: grey; }
         .Completed { background: green; }

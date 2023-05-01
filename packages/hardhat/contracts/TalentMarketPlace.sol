@@ -27,6 +27,7 @@ contract TalentMarketPlace {
     uint256 price;
     uint256 totalAmount;
     uint256 transactionCount;
+    uint256 rating;
   }
 
   struct Transaction {
@@ -59,6 +60,9 @@ contract TalentMarketPlace {
 
   mapping(address => bool) public vendorExists;
 
+  address[] private customerAddresses;
+  address[] private vendorAddresses;
+
   function createVendor(
     string memory _businessName,
     string memory _profession,
@@ -86,6 +90,8 @@ contract TalentMarketPlace {
     vendorExists[msg.sender] = true;
 
     vendorCount ++;
+
+    addVendorAddress(msg.sender);
   }
 
   function createTransaction (uint256 vendorIndex, address payable vendor) public payable {
@@ -105,6 +111,7 @@ contract TalentMarketPlace {
     vendorTransactions[vendor].push(VendorTransaction(payable(msg.sender), status, block.timestamp, 0));
     transactionCounts[msg.sender] += 1;
     vendorTransactionCounts[vendor] += 1;
+    addCustomerAddress(msg.sender);
   }
 
   function serviceReviewing(uint256 _index, address _customerAddress) public {
@@ -139,6 +146,7 @@ contract TalentMarketPlace {
     Vendor storage vendor = vendors[transaction.vendorIndex];
     vendor.totalAmount += transaction.amount;
     vendor.transactionCount ++;
+    vendor.rating ++;
   }
 
   function cancelService(uint256 _index, address _vendorAddress) public {
@@ -163,23 +171,22 @@ contract TalentMarketPlace {
 
     function vendorCancelService(uint256 _index, address _customerAddress) public {
 
-          Transaction storage transaction = customerTransactions[_customerAddress][_index];
-          VendorTransaction storage vendorTransaction = vendorTransactions[msg.sender][_index];
+      Transaction storage transaction = customerTransactions[_customerAddress][_index];
+      VendorTransaction storage vendorTransaction = vendorTransactions[msg.sender][_index];
 
-          require(block.timestamp <= transaction.dateCreated + (3 days), "You can not cancel now");
-          require(transaction.status == Status.InProgress, "Can't cancel at this stage");
+      require(block.timestamp <= transaction.dateCreated + (3 days), "You can not cancel now");
+      require(transaction.status == Status.InProgress, "Can't cancel at this stage");
 
-          require(!locked, "Reentrant call");
-          locked = true;
-          (bool sent,) = _customerAddress.call{value: transaction.amount}("");
-          require(sent, "Failed to send Ether");
-          locked = false;
 
-          transaction.status = Status(0);
-          transaction.dateCompleted = block.timestamp;
-          vendorTransaction.status = Status(0);
-          vendorTransaction.dateCompleted = block.timestamp;
-        }
+      (bool sent,) = _customerAddress.call{value: transaction.amount}("");
+      require(sent, "Failed to send Ether");
+
+
+      transaction.status = Status(0);
+      transaction.dateCompleted = block.timestamp;
+      vendorTransaction.status = Status(0);
+      vendorTransaction.dateCompleted = block.timestamp;
+    }
 
 
   function getBal() public view returns (uint256) {
@@ -196,7 +203,8 @@ contract TalentMarketPlace {
     string memory profession,
     uint256 price,
     uint256 totalAmount,
-    uint256 transCount
+    uint256 transCount,
+    uint256 rating
   ) {
 
     Vendor storage vendor = vendors[_index];
@@ -210,7 +218,8 @@ contract TalentMarketPlace {
     vendor.profession,
     vendor.price,
     vendor.totalAmount,
-    vendor.transactionCount
+    vendor.transactionCount,
+    vendor.rating
     );
   }
 
@@ -279,5 +288,62 @@ contract TalentMarketPlace {
   function getVendorCount() public view returns (uint256) {
     return vendorCount;
   }
+
+  function addCustomerAddress(address _address) private {
+      bool exists = false;
+      for (uint i = 0; i < customerAddresses.length; i++) {
+          if (customerAddresses[i] == _address) {
+              exists = true;
+              break;
+          }
+      }
+
+      if (!exists) {
+          customerAddresses.push(_address);
+      }
+  }
+
+  function addVendorAddress(address _address) private {
+        bool exists = false;
+        for (uint i = 0; i < vendorAddresses.length; i++) {
+            if (vendorAddresses[i] == _address) {
+                exists = true;
+                break;
+            }
+        }
+
+        if (!exists) {
+            vendorAddresses.push(_address);
+        }
+    }
+
+    function refundInProgressTransactions() public nonReentrant {
+      for (uint i = 0; i < customerAddresses.length; i++) {
+        address customer = customerAddresses[i];
+        Transaction[] storage transactions = customerTransactions[customer];
+
+        for (uint j = 0; j < transactions.length; j++) {
+          Transaction storage transaction = transactions[j];
+
+          if (transaction.status == Status(1) && block.timestamp > transaction.dateCreated + 3 minutes) {
+            (bool sent,) = transaction.customer.call{value: transaction.amount}("");
+            require(sent, "Failed to send Ether");
+            transaction.status = Status(3);
+            transaction.dateCompleted = block.timestamp;
+
+            Vendor storage _vendor = vendors[transaction.vendorIndex];
+            _vendor.rating -= 2;
+          }
+        }
+      }
+    }
+
+    modifier nonReentrant() {
+        require(!locked, "Reentrancy detected!");
+        locked = true;
+        _;
+        locked = false;
+    }
+
 
 }
