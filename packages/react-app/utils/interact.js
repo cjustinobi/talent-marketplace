@@ -2,7 +2,7 @@ import { providers, Contract } from 'ethers'
 import Lottery from '../../hardhat/artifacts/contracts/TalentMarketPlace.sol/TalentMarketPlace.json'
 import { priceToWei } from './helpers'
 
-export const contractAddress = '0x5dE11742D370c1a3e5E8531dc4bFCEa9df0eFA45'
+export const contractAddress = '0x5300D985a805DA1F182077d5ff188383a4bDa131'
 
 export async function getContract() {
 
@@ -114,6 +114,49 @@ export const approve = async (index, vendorAddress) => {
   }
 }
 
+export const sendForReview = async (index, customerAddress) => {
+
+  try {
+    const contract = await getContract()
+
+    let res = await contract.serviceReviewing(index, customerAddress)
+    return await res.wait()
+
+
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+
+export const cancelService = async (index, customerAddress) => {
+
+  try {
+    const contract = await getContract()
+
+    let res = await contract.cancelService(index, customerAddress)
+    return await res.wait()
+
+
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+export const vendorCancelService = async (index, customerAddress) => {
+
+  try {
+    const contract = await getContract()
+
+    let res = await contract.vendorCancelService(index, customerAddress)
+    return await res.wait()
+
+
+  } catch (e) {
+    console.log(e)
+  }
+}
+
 export const test = async () => {
 
   try {
@@ -126,4 +169,6 @@ export const test = async () => {
     console.log(e)
   }
 }
+
+// https://tailwindcss.com/_next/static/media/tailwindcss-mark.3c5441fc7a190fb1800d4a5c7f07ba4b1345a9c8.svg
 

@@ -1,4 +1,5 @@
 export const STATUS = status => {
+  console.log('cc ', status)
   switch (status) {
     case 0:
       return 'Cancelled';

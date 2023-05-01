@@ -100,7 +100,7 @@ contract TalentMarketPlace {
 
     require(_vendor.vendorAddress == vendor, "Wrong Vendor address entered");
 
-    Status status = Status.InProgress;
+    Status status = Status(1);
     customerTransactions[msg.sender].push(Transaction(vendorIndex, vendor, payable(msg.sender), msg.value, status, block.timestamp, 0, 0));
     vendorTransactions[vendor].push(VendorTransaction(payable(msg.sender), status, block.timestamp, 0));
     transactionCounts[msg.sender] += 1;
@@ -114,10 +114,10 @@ contract TalentMarketPlace {
     require(transaction.vendor == msg.sender, "Only the Vendor can confirm service completed");
     require(transaction.status != Status.Completed, "Only the Customer can confirm service completed");
 
-    transaction.status = Status.Reviewing;
+    transaction.status = Status(2);
     transaction.dateReviewing = block.timestamp;
 
-    vendorTransaction.status = Status.Reviewing;
+    vendorTransaction.status = Status(2);
   }
 
   function confirmService(uint256 _index, address _vendorAddress) public {
@@ -131,9 +131,9 @@ contract TalentMarketPlace {
     (bool sent,) = _vendorAddress.call{value: transaction.amount}("");
     require(sent, "Failed to send Ether");
 
-    transaction.status = Status.Completed;
+    transaction.status = Status(3);
     transaction.dateCompleted = block.timestamp;
-    vendorTransaction.status = Status.Completed;
+    vendorTransaction.status = Status(3);
     vendorTransaction.dateCompleted = block.timestamp;
 
     Vendor storage vendor = vendors[transaction.vendorIndex];
@@ -146,20 +146,40 @@ contract TalentMarketPlace {
       Transaction storage transaction = customerTransactions[msg.sender][_index];
       VendorTransaction storage vendorTransaction = vendorTransactions[_vendorAddress][_index];
 
-      require((transaction.status != Status.Reviewing) && timestamp <= block.timestamp - (3 days), "You can not cancel ");
+      require((transaction.status != Status.Reviewing) && block.timestamp <= transaction.dateCreated + (3 days), "You can not cancel");
       require(transaction.customer == msg.sender, "Only the customer can cancel the service");
 
-      require(!locked, "Reentrant call");
+      require(!locked, "Re entrant call");
       locked = true;
       (bool sent,) = msg.sender.call{value: transaction.amount}("");
       require(sent, "Failed to send Ether");
       locked = false;
 
-      transaction.status = Status.Cancelled;
+      transaction.status = Status(0);
       transaction.dateCompleted = block.timestamp;
       vendorTransaction.status = Status.Cancelled;
       vendorTransaction.dateCompleted = block.timestamp;
     }
+
+    function vendorCancelService(uint256 _index, address _customerAddress) public {
+
+          Transaction storage transaction = customerTransactions[_customerAddress][_index];
+          VendorTransaction storage vendorTransaction = vendorTransactions[msg.sender][_index];
+
+          require(block.timestamp <= transaction.dateCreated + (3 days), "You can not cancel now");
+          require(transaction.status == Status.InProgress, "Can't cancel at this stage");
+
+          require(!locked, "Reentrant call");
+          locked = true;
+          (bool sent,) = _customerAddress.call{value: transaction.amount}("");
+          require(sent, "Failed to send Ether");
+          locked = false;
+
+          transaction.status = Status(0);
+          transaction.dateCompleted = block.timestamp;
+          vendorTransaction.status = Status(0);
+          vendorTransaction.dateCompleted = block.timestamp;
+        }
 
 
   function getBal() public view returns (uint256) {

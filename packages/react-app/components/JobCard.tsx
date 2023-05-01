@@ -1,22 +1,26 @@
-import { ethers } from 'ethers'
-import { approve, timestampToDate, STATUS, truncate } from '../utils'
-import { useAccount } from 'wagmi'
+import {
+  sendForReview,
+  vendorCancelService,
+  timestampToDate,
+  STATUS,
+  truncate
+} from '../utils'
 
 interface TransactionCardProps {
   id: number
   customer: string
   status: number
-  dateCreated: number
+  created: number
+  completed: number
   getTransactionsHandler: () => void;
 }
 
-
-
-const TransactionCard: React.FC<TransactionCardProps> = ({
+const JobCard: React.FC<TransactionCardProps> = ({
     id,
     customer,
     status,
     created,
+    completed,
     getTransactionsHandler
    }) => {
 
@@ -33,17 +37,21 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
     }
   }
 
-  const { address } = useAccount()
+  const reviewHandler = async () => {
+    await sendForReview(id.toString(), customer)
+    getTransactionsHandler()
+  }
 
-  const approveHandler = async (id, address) => {
-    await approve(id.toString(), address)
+  const cancelHandler = async () => {
+    await vendorCancelService(id.toString(), customer)
     getTransactionsHandler()
   }
 
   return (
       <div className="bg-white rounded-lg shadow-lg p-4">
         <h2 className="font-light">{truncate(customer)}</h2>
-        <small>Created: {timestampToDate(created)}</small>
+        <small className="block">Created: {timestampToDate(created)}</small>
+        <small>Completed: {status === 3 ? timestampToDate(completed) : ''}</small>
         <div className="flex justify-between mt-3">
           <style jsx>{`
           .status {
@@ -55,33 +63,22 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
         .Reviewing { background: grey; }
         .Completed { background: green; }
       `}</style>
-          {/*<span className="font-light">{ethers.utils.formatEther(amount)} CELO</span>*/}
           <span className={`status ${STATUS(status)}`}>{STATUS(status)}</span>
         </div>
-        {/*<div className="flex justify-between">*/}
-        {/*  <div className="mr-4">*/}
-        {/*    <p>Participants</p>*/}
-        {/*    <span>{participants}</span>*/}
-        {/*  </div>*/}
-        {/*  <div>*/}
-        {/*    <p>End Date</p>*/}
-        {/*    <span>{timestampToDate(endTime.toNumber())}</span>*/}
-        {/*  </div>*/}
-        {/*</div>*/}
-        {/*<div>*/}
+
           {(STATUS(status) === 'Cancelled') && <button disabled className="mt-3 bg-slate-300 w-28 rounded">
             Cancelled
           </button>}
           {(STATUS(status) === 'InProgress') && <div className="flex justify-between">
-            <button onClick={() => cancelHandler(id, vendor)} className="mt-3 mr-1 bg-slate-200 w-28 rounded">
+            <button onClick={cancelHandler} className="mt-3 mr-1 bg-slate-200 w-28 rounded">
               Cancel
             </button>
-            <button onClick={() => approveHandler(id, vendor)} className="mt-3 ml-1 bg-[#87CEEB] w-28 rounded">
-              Approve
+            <button onClick={reviewHandler} className="mt-3 ml-1 bg-[#87CEEB] w-28 rounded">
+              Submit
             </button>
           </div>}
       </div>
   )
 }
 
-export default TransactionCard
+export default JobCard
