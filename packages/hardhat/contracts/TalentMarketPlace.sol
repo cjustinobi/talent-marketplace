@@ -27,7 +27,7 @@ contract TalentMarketPlace {
     uint256 price;
     uint256 totalAmount;
     uint256 transactionCount;
-    uint256 rating;
+    int256 rating;
   }
 
   struct Transaction {
@@ -204,7 +204,7 @@ contract TalentMarketPlace {
     uint256 price,
     uint256 totalAmount,
     uint256 transCount,
-    uint256 rating
+    int256 rating
   ) {
 
     Vendor storage vendor = vendors[_index];
@@ -318,14 +318,14 @@ contract TalentMarketPlace {
     }
 
     function refundInProgressTransactions() public nonReentrant {
-      for (uint i = 0; i < customerAddresses.length; i++) {
+      for (uint256 i = 0; i < customerAddresses.length; i++) {
         address customer = customerAddresses[i];
         Transaction[] storage transactions = customerTransactions[customer];
 
-        for (uint j = 0; j < transactions.length; j++) {
+        for (uint256 j = 0; j < transactions.length; j++) {
           Transaction storage transaction = transactions[j];
 
-          if (transaction.status == Status(1) && block.timestamp > transaction.dateCreated + 3 minutes) {
+          if (transaction.status == Status(1) && block.timestamp > transaction.dateCreated + (2 days)) {
             (bool sent,) = transaction.customer.call{value: transaction.amount}("");
             require(sent, "Failed to send Ether");
             transaction.status = Status(3);
@@ -333,6 +333,7 @@ contract TalentMarketPlace {
 
             Vendor storage _vendor = vendors[transaction.vendorIndex];
             _vendor.rating -= 2;
+
           }
         }
       }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAccount } from 'wagmi'
-import { getTransactions } from '@/utils'
+import { getTransactions, test } from '@/utils'
 import TransactionCard from '@/components/TransactionCard'
 
 const MyTransactions = () => {

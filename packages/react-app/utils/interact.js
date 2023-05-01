@@ -2,7 +2,7 @@ import { providers, Contract } from 'ethers'
 import Lottery from '../../hardhat/artifacts/contracts/TalentMarketPlace.sol/TalentMarketPlace.json'
 import { priceToWei } from './helpers'
 
-export const contractAddress = '0x389D265Bb40f1275CFd6Edb92EF1D26884A937ff'
+export const contractAddress = '0xB5F1f5B4d01Ec2896148d68e540225CE3fF55E25'
 
 export async function getContract() {
 
@@ -162,8 +162,9 @@ export const test = async () => {
   try {
     const contract = await getContract()
     // let res = await contract.getTime()
-    let res = await contract.getBal()
-    console.log(res.toString())
+    let res = await contract.refundInProgressTransactions()
+    console.log('test')
+    console.log(res)
 
   } catch (e) {
     console.log(e)

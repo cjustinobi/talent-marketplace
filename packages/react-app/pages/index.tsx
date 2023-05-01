@@ -15,7 +15,7 @@ const Home = () => {
   useEffect(() => {
 
     getVendorsHandler()
-    test()
+    // test()
 
   }, [getVendors])
 
