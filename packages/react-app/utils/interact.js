@@ -2,7 +2,7 @@ import { providers, Contract } from 'ethers'
 import Lottery from '../../hardhat/artifacts/contracts/TalentMarketPlace.sol/TalentMarketPlace.json'
 import { priceToWei } from './helpers'
 
-export const contractAddress = '0xB5F1f5B4d01Ec2896148d68e540225CE3fF55E25'
+export const contractAddress = '0x1a33357F8cdE30521D1612d1745f1efA8728af0c'
 
 export async function getContract() {
 

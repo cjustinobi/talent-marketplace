@@ -9,6 +9,8 @@ contract TalentMarketPlace {
 
   bool internal locked;
 
+  uint256 internal GRACE_PERIOD = 2;
+
   uint256 public vendorCount;
 
   enum Status {
@@ -325,7 +327,7 @@ contract TalentMarketPlace {
         for (uint256 j = 0; j < transactions.length; j++) {
           Transaction storage transaction = transactions[j];
 
-          if (transaction.status == Status(1) && block.timestamp > transaction.dateCreated + (2 days)) {
+          if (transaction.status == Status(1) && block.timestamp > transaction.dateCreated + (2 minutes)) {
             (bool sent,) = transaction.customer.call{value: transaction.amount}("");
             require(sent, "Failed to send Ether");
             transaction.status = Status(3);
@@ -333,6 +335,19 @@ contract TalentMarketPlace {
 
             Vendor storage _vendor = vendors[transaction.vendorIndex];
             _vendor.rating -= 2;
+
+            // Stop corresponding Vendor transaction
+            VendorTransaction[] storage vendorTxs = vendorTransactions[transaction.vendor];
+
+            for (uint256 k = 0; k < vendorTxs.length; k++) {
+                VendorTransaction storage vendorTx = vendorTxs[k];
+                if (vendorTx.status == Status(1) && block.timestamp > vendorTx.dateCreated + (2 minutes)) {
+                  vendorTx.status = Status(3);
+                  vendorTx.dateCompleted = block.timestamp;
+                }
+
+            }
+
 
           }
         }
