@@ -44,8 +44,10 @@ contract TalentMarketPlace {
   }
 
   struct VendorTransaction {
+      address payable vendor;
       address payable customer;
       Status status;
+      uint256 amount;
       uint256 dateCreated;
       uint256 dateCompleted;
     }
@@ -110,7 +112,7 @@ contract TalentMarketPlace {
 
     Status status = Status(1);
     customerTransactions[msg.sender].push(Transaction(vendorIndex, vendor, payable(msg.sender), msg.value, status, block.timestamp, 0, 0));
-    vendorTransactions[vendor].push(VendorTransaction(payable(msg.sender), status, block.timestamp, 0));
+    vendorTransactions[vendor].push(VendorTransaction(payable(vendor), payable(msg.sender), status, msg.value, block.timestamp, 0));
     transactionCounts[msg.sender] += 1;
     vendorTransactionCounts[vendor] += 1;
     addCustomerAddress(msg.sender);
@@ -353,6 +355,36 @@ contract TalentMarketPlace {
         }
       }
     }
+
+    function refundReviewTransactions() public nonReentrant {
+          for (uint256 i = 0; i < vendorAddresses.length; i++) {
+            address vendor = vendorAddresses[i];
+            VendorTransaction[] storage vendortxs = vendorTransactions[vendor];
+
+            for (uint256 j = 0; j < vendortxs.length; j++) {
+              VendorTransaction storage vendortx = vendortxs[j];
+
+              if (vendortx.status == Status(2) && block.timestamp > vendortx.dateCreated + (3 minutes)) {
+                (bool sent,) = vendortx.vendor.call{value: vendortx.amount}("");
+                require(sent, "Failed to send Ether");
+                vendortx.status = Status(3);
+                vendortx.dateCompleted = block.timestamp;
+
+                // Stop corresponding Customer transaction
+                Transaction[] storage txs = customerTransactions[vendortx.customer];
+
+                for (uint256 k = 0; k < txs.length; k++) {
+                    Transaction storage transaction = txs[k];
+                    if (transaction.status == Status(2) && block.timestamp > transaction.dateCreated + (2 minutes)) {
+                      transaction.status = Status(3);
+                      transaction.dateCompleted = block.timestamp;
+                    }
+
+                }
+              }
+            }
+          }
+        }
 
     modifier nonReentrant() {
         require(!locked, "Reentrancy detected!");

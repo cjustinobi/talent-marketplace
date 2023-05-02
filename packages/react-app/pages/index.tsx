@@ -9,6 +9,8 @@ const Home = () => {
 
   const getVendorsHandler = async () => {
     const res = await getVendors()
+    console.log('res')
+    console.log(res)
     setVendors(res)
   }
 
@@ -28,6 +30,10 @@ const Home = () => {
             <VendorCard
               key={vendor.id}
               id={vendor.id}
+              rating={vendor.rating.toString()}
+              earnings={vendor.totalAmount.toString()}
+              transactionCount={vendor.transCount.toString()}
+              image={vendor.filePath}
               businessName={vendor.businessName}
               price={vendor.price}
               vendor={vendor.vendorAddress}
