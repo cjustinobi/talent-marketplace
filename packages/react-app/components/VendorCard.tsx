@@ -4,7 +4,7 @@ import { createTransaction } from '../utils'
 import { useAccount } from 'wagmi'
 
 interface VendorCardProps {
-  id: any
+  id: string
   image: string
   rating: string
   earnings: string
@@ -30,7 +30,7 @@ const VendorCard: React.FC<VendorCardProps> = ({
   const { address } = useAccount()
 
   const hire = async (id, address, price) => {
-    await createTransaction(id.toString(), address, price.toString())
+    await createTransaction(id, address, price.toString())
     getVendorsHandler()
   }
 
@@ -46,7 +46,7 @@ const VendorCard: React.FC<VendorCardProps> = ({
           <span className="font-light">{ethers.utils.formatEther(price)} CELO</span>
         </h2>
         <small>Transactions: {transactionCount}</small><br/>
-        <small>Earnings: {earnings}</small><br/>
+        <small>Earnings: {ethers.utils.formatEther(earnings)}</small><br/>
         <small>Rating: {rating}</small>
           {(vendor !== address) && <button onClick={() => hire(id, vendor, price)} className="mt-3 bg-slate-300 w-28 rounded">
             Hire

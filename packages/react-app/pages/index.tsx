@@ -29,7 +29,7 @@ const Home = () => {
 
             <VendorCard
               key={vendor.id}
-              id={vendor.id}
+              id={vendor.id.toString()}
               rating={vendor.rating.toString()}
               earnings={vendor.totalAmount.toString()}
               transactionCount={vendor.transCount.toString()}
