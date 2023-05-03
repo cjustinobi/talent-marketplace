@@ -29,7 +29,7 @@ const VendorCard: React.FC<VendorCardProps> = ({
 
   const { address } = useAccount()
 
-  const hire = async (id, address, price) => {
+  const hire = async () => {
     await createTransaction(id, address, price.toString())
     getVendorsHandler()
   }
@@ -48,7 +48,7 @@ const VendorCard: React.FC<VendorCardProps> = ({
         <small>Transactions: {transactionCount}</small><br/>
         <small>Earnings: {ethers.utils.formatEther(earnings)}</small><br/>
         <small>Rating: {rating}</small>
-          {(vendor !== address) && <button onClick={() => hire(id, vendor, price)} className="mt-3 bg-slate-300 w-28 rounded">
+          {(vendor !== address) && <button onClick={hire} className="mt-3 bg-slate-300 w-28 rounded">
             Hire
           </button>}
       </div>
