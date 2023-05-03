@@ -386,5 +386,4 @@ contract TalentMarketPlace {
       locked = false;
     }
 
-
 }
