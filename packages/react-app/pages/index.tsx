@@ -1,23 +1,20 @@
 import { useEffect, useState } from 'react'
-import { getVendors, test } from '../utils'
+import { getVendors } from '../utils'
 import VendorCard from '../components/VendorCard'
 
 
 const Home = () => {
 
-  const [vendors, setVendors] = useState(undefined)
+  const [vendors, setVendors] = useState<any[]>([])
 
   const getVendorsHandler = async () => {
     const res = await getVendors()
-    console.log('res')
-    console.log(res)
     setVendors(res)
   }
 
   useEffect(() => {
 
     getVendorsHandler()
-    // test()
 
   }, [getVendors])
 
