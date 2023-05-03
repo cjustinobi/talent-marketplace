@@ -9,8 +9,6 @@ contract TalentMarketPlace {
 
   bool internal locked;
 
-  uint256 internal GRACE_PERIOD = 2;
-
   uint256 public vendorCount;
 
   enum Status {
@@ -44,13 +42,13 @@ contract TalentMarketPlace {
   }
 
   struct VendorTransaction {
-      address payable vendor;
-      address payable customer;
-      Status status;
-      uint256 amount;
-      uint256 dateCreated;
-      uint256 dateCompleted;
-    }
+    address payable vendor;
+    address payable customer;
+    Status status;
+    uint256 amount;
+    uint256 dateCreated;
+    uint256 dateCompleted;
+  }
 
   mapping (address => uint256) transactionCounts;
 
@@ -173,24 +171,22 @@ contract TalentMarketPlace {
       vendorTransaction.dateCompleted = block.timestamp;
     }
 
-    function vendorCancelService(uint256 _index, address _customerAddress) public {
+  function vendorCancelService(uint256 _index, address _customerAddress) public {
 
-      Transaction storage transaction = customerTransactions[_customerAddress][_index];
-      VendorTransaction storage vendorTransaction = vendorTransactions[msg.sender][_index];
+    Transaction storage transaction = customerTransactions[_customerAddress][_index];
+    VendorTransaction storage vendorTransaction = vendorTransactions[msg.sender][_index];
 
-      require(block.timestamp <= transaction.dateCreated + (3 days), "You can not cancel now");
-      require(transaction.status == Status.InProgress, "Can't cancel at this stage");
+    require(block.timestamp <= transaction.dateCreated + (3 days), "You can not cancel now");
+    require(transaction.status == Status.InProgress, "Can't cancel at this stage");
 
+    (bool sent,) = _customerAddress.call{value: transaction.amount}("");
+    require(sent, "Failed to send Ether");
 
-      (bool sent,) = _customerAddress.call{value: transaction.amount}("");
-      require(sent, "Failed to send Ether");
-
-
-      transaction.status = Status(0);
-      transaction.dateCompleted = block.timestamp;
-      vendorTransaction.status = Status(0);
-      vendorTransaction.dateCompleted = block.timestamp;
-    }
+    transaction.status = Status(0);
+    transaction.dateCompleted = block.timestamp;
+    vendorTransaction.status = Status(0);
+    vendorTransaction.dateCompleted = block.timestamp;
+  }
 
 
   function getBal() public view returns (uint256) {
@@ -286,7 +282,7 @@ contract TalentMarketPlace {
   }
 
   function getVendorTransactionCount() public view returns (uint256) {
-      return vendorTransactionCounts[msg.sender];
+    return vendorTransactionCounts[msg.sender];
   }
 
   function getVendorCount() public view returns (uint256) {
@@ -294,32 +290,32 @@ contract TalentMarketPlace {
   }
 
   function addCustomerAddress(address _address) private {
-      bool exists = false;
+    bool exists = false;
       for (uint i = 0; i < customerAddresses.length; i++) {
-          if (customerAddresses[i] == _address) {
-              exists = true;
-              break;
+        if (customerAddresses[i] == _address) {
+          exists = true;
+            break;
           }
       }
 
-      if (!exists) {
-          customerAddresses.push(_address);
-      }
+    if (!exists) {
+      customerAddresses.push(_address);
+    }
   }
 
   function addVendorAddress(address _address) private {
-        bool exists = false;
-        for (uint i = 0; i < vendorAddresses.length; i++) {
-            if (vendorAddresses[i] == _address) {
-                exists = true;
-                break;
-            }
+    bool exists = false;
+      for (uint i = 0; i < vendorAddresses.length; i++) {
+        if (vendorAddresses[i] == _address) {
+          exists = true;
+          break;
         }
+      }
 
-        if (!exists) {
-            vendorAddresses.push(_address);
-        }
+    if (!exists) {
+      vendorAddresses.push(_address);
     }
+  }
 
     function refundInProgressTransactions() public nonReentrant {
       for (uint256 i = 0; i < customerAddresses.length; i++) {
@@ -329,7 +325,7 @@ contract TalentMarketPlace {
         for (uint256 j = 0; j < transactions.length; j++) {
           Transaction storage transaction = transactions[j];
 
-          if (transaction.status == Status(1) && block.timestamp > transaction.dateCreated + (2 minutes)) {
+          if (transaction.status == Status(1) && block.timestamp > transaction.dateCreated + (2 days)) {
             (bool sent,) = transaction.customer.call{value: transaction.amount}("");
             require(sent, "Failed to send Ether");
             transaction.status = Status(3);
@@ -342,55 +338,52 @@ contract TalentMarketPlace {
             VendorTransaction[] storage vendorTxs = vendorTransactions[transaction.vendor];
 
             for (uint256 k = 0; k < vendorTxs.length; k++) {
-                VendorTransaction storage vendorTx = vendorTxs[k];
-                if (vendorTx.status == Status(1) && block.timestamp > vendorTx.dateCreated + (2 minutes)) {
-                  vendorTx.status = Status(3);
-                  vendorTx.dateCompleted = block.timestamp;
-                }
-
+              VendorTransaction storage vendorTx = vendorTxs[k];
+              if (vendorTx.status == Status(1) && block.timestamp > vendorTx.dateCreated + (2 days)) {
+                vendorTx.status = Status(3);
+                vendorTx.dateCompleted = block.timestamp;
+              }
             }
-
-
           }
         }
       }
     }
 
     function refundReviewTransactions() public nonReentrant {
-          for (uint256 i = 0; i < vendorAddresses.length; i++) {
-            address vendor = vendorAddresses[i];
-            VendorTransaction[] storage vendortxs = vendorTransactions[vendor];
+      for (uint256 i = 0; i < vendorAddresses.length; i++) {
+        address vendor = vendorAddresses[i];
+        VendorTransaction[] storage vendortxs = vendorTransactions[vendor];
 
-            for (uint256 j = 0; j < vendortxs.length; j++) {
-              VendorTransaction storage vendortx = vendortxs[j];
+        for (uint256 j = 0; j < vendortxs.length; j++) {
+          VendorTransaction storage vendortx = vendortxs[j];
 
-              if (vendortx.status == Status(2) && block.timestamp > vendortx.dateCreated + (3 minutes)) {
-                (bool sent,) = vendortx.vendor.call{value: vendortx.amount}("");
-                require(sent, "Failed to send Ether");
-                vendortx.status = Status(3);
-                vendortx.dateCompleted = block.timestamp;
+          if (vendortx.status == Status(2) && block.timestamp > vendortx.dateCreated + (3 days)) {
+            (bool sent,) = vendortx.vendor.call{value: vendortx.amount}("");
+            require(sent, "Failed to send Ether");
+            vendortx.status = Status(3);
+            vendortx.dateCompleted = block.timestamp;
 
-                // Stop corresponding Customer transaction
-                Transaction[] storage txs = customerTransactions[vendortx.customer];
+            // Stop corresponding Customer transaction
+            Transaction[] storage txs = customerTransactions[vendortx.customer];
 
-                for (uint256 k = 0; k < txs.length; k++) {
-                    Transaction storage transaction = txs[k];
-                    if (transaction.status == Status(2) && block.timestamp > transaction.dateCreated + (2 minutes)) {
-                      transaction.status = Status(3);
-                      transaction.dateCompleted = block.timestamp;
-                    }
-
-                }
+            for (uint256 k = 0; k < txs.length; k++) {
+              Transaction storage transaction = txs[k];
+              if (transaction.status == Status(2) && block.timestamp > transaction.dateCreated + (3 days)) {
+                transaction.status = Status(3);
+                transaction.dateCompleted = block.timestamp;
               }
+
             }
           }
         }
+      }
+    }
 
     modifier nonReentrant() {
-        require(!locked, "Reentrancy detected!");
-        locked = true;
-        _;
-        locked = false;
+      require(!locked, "Reentrancy detected!");
+      locked = true;
+      _;
+      locked = false;
     }
 
 
