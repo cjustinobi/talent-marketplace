@@ -4,7 +4,7 @@ import { createTransaction } from '../utils'
 import { useAccount } from 'wagmi'
 
 interface VendorCardProps {
-  id: number
+  id: any
   image: string
   rating: string
   earnings: string
