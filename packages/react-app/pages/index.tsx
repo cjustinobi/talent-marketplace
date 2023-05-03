@@ -2,10 +2,20 @@ import { useEffect, useState } from 'react'
 import { getVendors } from '../utils'
 import VendorCard from '../components/VendorCard'
 
+interface UserData {
+  id: string;
+  rating: string;
+  earnings: string;
+  transactionCount: any;
+  image: any;
+  businessName: any;
+  price: any;
+  vendor: any;
+}
 
 const Home = () => {
 
-  const [vendors, setVendors] = useState<any[]>([])
+  const [vendors, setVendors] = useState<UserData | undefined>(undefined)
 
   const getVendorsHandler = async () => {
     const res = await getVendors()
