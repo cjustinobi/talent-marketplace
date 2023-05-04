@@ -34,4 +34,4 @@ npm run dev
 
 ## Demo
 
-[Talent Marketplace]()
+[Talent Marketplace](https://talent-mkt.vercel.app/)
