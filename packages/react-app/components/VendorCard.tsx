@@ -30,7 +30,7 @@ const VendorCard: React.FC<VendorCardProps> = ({
   const { address } = useAccount()
 
   const hire = async () => {
-    await createTransaction(id, address, price.toString())
+    await createTransaction(id, vendor, price.toString())
     getVendorsHandler()
   }
 
